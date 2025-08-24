@@ -126,6 +126,7 @@ async fn main() -> std::io::Result<()> {
     tracing::subscriber::set_global_default(subscriber).expect("Unable to set global default");
     info!("Starting the redactr service");
     debug!("Binding to address: {}", bind_address);
+    info!(address = %address, port = %port, "Listening for requests");
     
     let prometheus = PrometheusMetricsBuilder::new("redactr")
         .endpoint("/metrics")
