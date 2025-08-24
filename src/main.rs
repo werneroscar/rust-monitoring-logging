@@ -3,6 +3,8 @@ use psutil::memory;
 use redactr::load_rule_configs;
 use regex::Regex;
 use serde::Serialize;
+use tracing::{info, warn, Level};
+use tracing_subscriber::FmtSubscriber;
 use std::time::{SystemTime, UNIX_EPOCH};
 use actix_web_prom::PrometheusMetricsBuilder;
 
@@ -102,6 +104,15 @@ async fn redact(input_text: web::Json<String>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // Initialize logging
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO) // max_level means it will start logging at INFO and HIGHER, not up to INFO
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber).expect("Unable to set global default");
+
+    info!("Starting the redactr service");
+    
     let prometheus = PrometheusMetricsBuilder::new("redactr")
         .endpoint("/metrics")
         .build()
@@ -114,7 +125,7 @@ async fn main() -> std::io::Result<()> {
         .service(web::resource("/redact").route(web::post().to(redact)))
         .service(web::resource("/health").route(web::get().to(health)))
     })
-    .bind("127.0.0.1:8080")?
+    .bind("127.0.0.1:8081")?
     .run()
     .await
 }
