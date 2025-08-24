@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use tracing::info;
 use std::collections::HashMap;
 
 // load the regex-fules.json file to provide configs
@@ -32,7 +33,7 @@ impl Rule {
     }
 
     pub fn on_match(&mut self, matched_text: &str) -> String {
-        println!("Redacting: {}", matched_text);
+        info!("Redacting: {}", matched_text);
         let redacted_match = self
             .mapping
             .entry(matched_text.to_string())
@@ -40,7 +41,7 @@ impl Rule {
                 self.count += 1;
                 format!("{}{}", self.placeholder, self.count)
             });
-        println!("Redacted result: {}", redacted_match);
+        info!("Redacted result: {}", redacted_match);
         redacted_match.clone()
     }
 }
