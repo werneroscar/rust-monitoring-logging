@@ -104,13 +104,23 @@ async fn redact(input_text: web::Json<String>) -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let logging_level = std::env::var("REDACTR_LOGGING_LEVEL").unwrap_or("info".to_string());
+    let max_level = match logging_level.as_str() {
+        "trace" => Level::TRACE,
+        "debug" => Level::DEBUG,
+        "info" => Level::INFO,
+        "warn" => Level::WARN,
+        "error" => Level::ERROR,
+        _ => Level::INFO,
+    };
+
     let address = "127.0.0.1";
     let port = "8081";
     let bind_address = format!("{}:{}", address, port);
 
     // Initialize logging
     let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::DEBUG) // with_max_level means it will start logging at INFO and HIGHER, not up to INFO
+        .with_max_level(max_level) // with_max_level means it will start logging at INFO and HIGHER, not up to INFO
         .finish();
 
     tracing::subscriber::set_global_default(subscriber).expect("Unable to set global default");
